@@ -1,4 +1,4 @@
-name: Publish interactive book
+name: Publish English interactive book
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -23,6 +23,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up narration voice
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Create warm English narration
+        run: |
+          python -m pip install edge-tts
+          python scripts/generate_english_audio.py
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:

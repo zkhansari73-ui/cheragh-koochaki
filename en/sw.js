@@ -1,4 +1,4 @@
-const CACHE = 'little-light-en-v1';
+const CACHE = 'little-light-en-v2';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest', './sw.js',
   './icons/icon-192.png', './icons/icon-512.png',
