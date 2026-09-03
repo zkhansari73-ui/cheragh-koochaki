@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#172b46">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>The Little Light That Came With Me</title>
+  <meta name="description" content="An interactive children's book. Turn the pages and listen to the story.">
+  <style>
+    :root { color-scheme: dark; --ink:#fdf8e9; --navy:#10243d; --navy2:#071525; --gold:#ffd662; --glass:rgba(8,24,41,.78); }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display:none !important; }
+    html, body { height:100%; margin:0; overflow:hidden; }
+    body { font-family: Tahoma, Arial, sans-serif; color:var(--ink); background:radial-gradient(circle at 50% 35%, #285270 0, var(--navy) 48%, var(--navy2) 100%); }
+    button { font:inherit; color:inherit; }
+    .app { min-height:100%; display:grid; grid-template-rows:auto 1fr auto; gap:12px; padding:max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+    header { display:flex; align-items:center; justify-content:space-between; gap:10px; max-width:900px; width:100%; margin:auto; }
+    .header-actions { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+    h1 { margin:0; min-width:0; flex:1; font-size:clamp(16px, 3.4vw, 22px); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .icon-button { width:48px; height:48px; border:1px solid rgba(255,255,255,.18); border-radius:50%; background:var(--glass); display:grid; place-items:center; cursor:pointer; box-shadow:0 6px 22px rgba(0,0,0,.18); }
+    .icon-button:active { transform:scale(.96); }
+    .icon-button svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .icon-button.on { color:#17243a; background:var(--gold); border-color:transparent; }
+    .install-button { min-height:48px; border:1px solid rgba(255,255,255,.18); border-radius:24px; padding:0 15px; background:var(--gold); color:#17243a; font-weight:700; cursor:pointer; box-shadow:0 6px 22px rgba(0,0,0,.18); }
+    .install-button:active { transform:scale(.96); }
+    .install-guide { position:fixed; inset:0; z-index:20; display:grid; place-items:center; padding:20px; background:rgba(1,10,19,.78); backdrop-filter:blur(5px); }
+    .install-card { width:min(100%, 430px); padding:22px; border:1px solid rgba(255,255,255,.2); border-radius:24px; background:#10243d; box-shadow:0 24px 70px rgba(0,0,0,.5); }
+    .install-card h2 { margin:0 0 12px; font-size:21px; }
+    .install-card p { margin:0 0 16px; color:rgba(255,255,255,.82); line-height:1.9; font-size:16px; }
+    .install-card button { width:100%; min-height:50px; border:0; border-radius:16px; background:var(--gold); color:#17243a; font-weight:700; cursor:pointer; }
+    main { min-height:0; display:grid; place-items:center; position:relative; }
+    .book-wrap { height:100%; width:100%; min-height:0; display:grid; place-items:center; perspective:1600px; }
+    .book { position:relative; height:min(100%, calc(100vw - 24px)); aspect-ratio:1; max-width:880px; border-radius:16px; overflow:hidden; background:#f8edce; box-shadow:0 26px 70px rgba(0,0,0,.43), 0 0 0 1px rgba(255,255,255,.12); transform-style:preserve-3d; touch-action:pan-y; }
+    .book::after { content:""; position:absolute; inset:0; pointer-events:none; box-shadow:inset 0 0 34px rgba(47,27,11,.15); border-radius:inherit; }
+    #page { width:100%; height:100%; display:block; object-fit:contain; backface-visibility:hidden; transform-origin:center; }
+    #page.turn-forward { animation:turnForward .34s ease-out; }
+    #page.turn-back { animation:turnBack .34s ease-out; }
+    @keyframes turnForward { from { transform:perspective(1400px) rotateY(38deg) scale(.97); opacity:.42; } to { transform:perspective(1400px) rotateY(0) scale(1); opacity:1; } }
+    @keyframes turnBack { from { transform:perspective(1400px) rotateY(-38deg) scale(.97); opacity:.42; } to { transform:perspective(1400px) rotateY(0) scale(1); opacity:1; } }
+    .tap-zone { position:absolute; top:0; bottom:0; width:24%; z-index:2; border:0; background:transparent; cursor:pointer; }
+    .tap-prev { left:0; } .tap-next { right:0; }
+    footer { width:100%; max-width:900px; margin:auto; display:grid; grid-template-columns:56px 1fr 56px; align-items:center; gap:12px; }
+    .nav { width:56px; height:56px; border:1px solid rgba(255,255,255,.18); border-radius:18px; background:var(--glass); display:grid; place-items:center; cursor:pointer; box-shadow:0 8px 24px rgba(0,0,0,.2); }
+    .nav:disabled { opacity:.3; cursor:default; }
+    .nav:not(:disabled):active { transform:scale(.95); }
+    .nav svg { width:27px; height:27px; fill:none; stroke:currentColor; stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; }
+    .status { text-align:center; min-width:0; }
+    .counter { font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; }
+    .hint { margin-top:4px; font-size:12px; color:rgba(255,255,255,.68); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+    @media (min-width:800px) { .app { padding:20px; gap:16px; } .book { border-radius:22px; } }
+    @media (max-width:620px) {
+      .install-button { position:fixed; z-index:10; left:50%; bottom:max(82px, calc(70px + env(safe-area-inset-bottom))); transform:translateX(-50%); min-width:190px; border:2px solid rgba(255,255,255,.85); box-shadow:0 10px 32px rgba(0,0,0,.48); }
+      .install-button:active { transform:translateX(-50%) scale(.96); }
+    }
+    @media (max-height:620px) { .app { gap:7px; padding-top:7px; padding-bottom:7px; } .icon-button { width:40px; height:40px; } .nav { width:48px; height:48px; } .install-button { bottom:64px; } }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior:auto !important; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>The Little Light That Came With Me</h1>
+      <div class="header-actions">
+        <button id="install" class="install-button" type="button">Install offline</button>
+        <button id="sound" class="icon-button" type="button" aria-pressed="false" aria-label="Turn story audio on">
+          <svg id="soundOn" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M11 5 6.5 9H3v6h3.5l4.5 4z"/><path d="M15 9.5a4 4 0 0 1 0 5"/><path d="M17.8 6.8a8 8 0 0 1 0 10.4"/></svg>
+          <svg id="soundOff" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 9H3v6h3.5l4.5 4z"/><path d="m16 10 5 5m0-5-5 5"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <div class="book-wrap">
+        <div class="book" id="book" aria-live="polite">
+          <img id="page" src="pages/page-01.jpg" alt="Cover of The Little Light That Came With Me">
+          <button class="tap-zone tap-prev" id="tapPrev" aria-label="Previous page"></button>
+          <button class="tap-zone tap-next" id="tapNext" aria-label="Next page"></button>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <button id="prev" class="nav" type="button" aria-label="Previous page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <div class="status">
+        <div class="counter"><span id="current">1</span> of <span>25</span></div>
+        <div class="hint" id="hint">Tap the speaker to hear the story</div>
+      </div>
+      <button id="next" class="nav" type="button" aria-label="Next page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </footer>
+  </div>
+
+  <div id="installGuide" class="install-guide" role="dialog" aria-modal="true" aria-labelledby="installTitle" hidden>
+    <div class="install-card">
+      <h2 id="installTitle">Install the book on your phone</h2>
+      <p id="installText">Open this link in Chrome, then use the three-dot menu and choose “Install app” or “Add to Home screen.”</p>
+      <button id="closeInstallGuide" type="button">Got it</button>
+    </div>
+  </div>
+
+  <script>
+    const total = 25;
+    const narration = {
+      1: 'The Little Light That Came With Me. A story about first days, courage, and hope.',
+      2: 'The Little Light That Came With Me.',
+      4: 'The Little Light That Came With Me. A warm story for little hearts and brave souls.',
+      5: 'Some lights are not held in our hands. They shine inside our hearts.',
+      6: 'On the morning of her first day at preschool, Roshana opened her eyes and immediately knew that something was missing.',
+      8: 'Roshana’s mom fastened the straps of her backpack. It is okay to feel afraid, she said.',
+      10: 'The path to preschool wound through the wet grass. Roshana walked behind Mom and softly repeated: one blink for a breath, one blink for a step.',
+      12: 'By the door, a rabbit tossed a ball into the air. Miss Hedgehog, the kind teacher, welcomed Roshana.',
+      14: 'At first, Roshana sat in the corner of the rug. Just then, she heard a sob from the dark backpack room.',
+      16: 'A tiny beetle was lost among the big backpacks. Roshana took a breath and stepped forward. Her little light grew brighter.',
+      18: 'Roshana said, I am afraid too. Let us look together. Her light shone under a bench. There were two blue shoes!',
+      20: 'Roshana and Poya helped the children build a little town. Her light was warm and golden because she had done something kind while afraid.',
+      22: 'Roshana laughed. My light came from inside me. I only had to take one blink for a breath and one blink for a step.',
+      24: 'That night, Roshana tucked her light gently under the blanket, so her dreams could find their way home too.',
+      25: 'The end. One blink for a breath, one blink for a step.'
+    };
+    const descriptions = Array.from({length: total}, (_, i) => `Page ${i + 1} of The Little Light That Came With Me`);
+    descriptions[0] = 'Cover of The Little Light That Came With Me';
+    let index = Math.min(total, Math.max(1, Number(localStorage.getItem('cheragh-en-page')) || 1));
+    let soundEnabled = false;
+    let turning = false;
+    let startX = 0;
+    const narrator = new Audio();
+    narrator.preload = 'auto';
+    const pageTurn = new Audio('audio/page-turn.wav');
+    pageTurn.preload = 'auto';
+    pageTurn.volume = 0.65;
+    const page = document.getElementById('page');
+    const book = document.getElementById('book');
+    const current = document.getElementById('current');
+    const hint = document.getElementById('hint');
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    const sound = document.getElementById('sound');
+    const install = document.getElementById('install');
+    const installGuide = document.getElementById('installGuide');
+    const installText = document.getElementById('installText');
+    const closeInstallGuide = document.getElementById('closeInstallGuide');
+    const soundOn = document.getElementById('soundOn');
+    const soundOff = document.getElementById('soundOff');
+    const formatNumber = n => new Intl.NumberFormat('en-US').format(n);
+    const imagePath = n => `pages/page-${String(n).padStart(2, '0')}.jpg`;
+    let installPrompt = null;
+
+    function updateUI() {
+      page.src = imagePath(index);
+      page.alt = descriptions[index - 1];
+      current.textContent = formatNumber(index);
+      prev.disabled = index === 1;
+      next.disabled = index === total;
+      localStorage.setItem('cheragh-en-page', index);
+      [index - 1, index + 1].filter(n => n >= 1 && n <= total).forEach(n => { const img = new Image(); img.src = imagePath(n); });
+    }
+
+    function stopAudio() {
+      narrator.pause();
+      narrator.currentTime = 0;
+      pageTurn.pause();
+      pageTurn.currentTime = 0;
+    }
+
+    function readPage() {
+      narrator.pause();
+      narrator.currentTime = 0;
+      if (!soundEnabled || !narration[index]) return;
+      narrator.src = `audio/page-${String(index).padStart(2, '0')}.mp3`;
+      narrator.play().catch(() => { hint.textContent = 'Turn the speaker off and on once'; });
+    }
+
+    function playTurnSound() {
+      if (!soundEnabled) return;
+      pageTurn.currentTime = 0;
+      pageTurn.play().catch(() => {});
+    }
+
+    async function go(delta) {
+      const target = index + delta;
+      if (turning || target < 1 || target > total) return;
+      turning = true;
+      narrator.pause();
+      narrator.currentTime = 0;
+      playTurnSound();
+      index = target;
+      updateUI();
+      page.classList.remove('turn-forward', 'turn-back');
+      void page.offsetWidth;
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) page.classList.add(delta > 0 ? 'turn-forward' : 'turn-back');
+      setTimeout(() => {
+        page.classList.remove('turn-forward', 'turn-back');
+        turning = false;
+        readPage();
+      }, 480);
+    }
+
+    sound.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      sound.classList.toggle('on', soundEnabled);
+      sound.setAttribute('aria-pressed', String(soundEnabled));
+      sound.setAttribute('aria-label', soundEnabled ? 'Turn story audio off' : 'Turn story audio on');
+      soundOn.hidden = !soundEnabled;
+      soundOff.hidden = soundEnabled;
+      hint.textContent = soundEnabled ? 'Story audio is on' : 'Tap the speaker to hear the story';
+      if (soundEnabled) readPage(); else stopAudio();
+    });
+    addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      installPrompt = event;
+      install.hidden = false;
+    });
+    install.addEventListener('click', async () => {
+      if (installPrompt) {
+        installPrompt.prompt();
+        const choice = await installPrompt.userChoice;
+        if (choice.outcome !== 'accepted') hint.textContent = 'Tap Install offline to try again';
+        installPrompt = null;
+      } else {
+        const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        const inApp = /Instagram|FBAN|FBAV|Telegram|WhatsApp/i.test(navigator.userAgent);
+        installText.textContent = ios
+          ? 'In Safari, tap Share and then choose “Add to Home Screen.”'
+          : inApp
+            ? 'This page is open inside a messaging app. Choose “Open in Chrome,” then open Chrome’s three-dot menu and tap “Install app.”'
+            : 'Open the browser’s three-dot menu and choose “Install app” or “Add to Home screen.”';
+        installGuide.hidden = false;
+      }
+    });
+    closeInstallGuide.addEventListener('click', () => { installGuide.hidden = true; });
+    installGuide.addEventListener('click', event => { if (event.target === installGuide) installGuide.hidden = true; });
+    addEventListener('appinstalled', () => {
+      install.hidden = true;
+      hint.textContent = 'The book is installed for offline use';
+    });
+    prev.addEventListener('click', () => go(-1));
+    next.addEventListener('click', () => go(1));
+    document.getElementById('tapPrev').addEventListener('click', () => go(-1));
+    document.getElementById('tapNext').addEventListener('click', () => go(1));
+    book.addEventListener('pointerdown', e => { startX = e.clientX; });
+    book.addEventListener('pointerup', e => {
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 45) go(dx < 0 ? 1 : -1);
+    });
+    addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') go(1);
+      if (e.key === 'ArrowLeft') go(-1);
+      if (e.key === ' ') { e.preventDefault(); sound.click(); }
+    });
+    addEventListener('beforeunload', stopAudio);
+    if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+    if (matchMedia('(display-mode: standalone)').matches) install.hidden = true;
+    updateUI();
+  </script>
+</body>
+</html>
