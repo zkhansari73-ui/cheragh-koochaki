@@ -180,7 +180,7 @@
       narrator.currentTime = 0;
       const actual = pageNumbers[index - 1];
       if (!soundEnabled || !narration[actual]) return;
-      narrator.src = `audio/page-${String(actual).padStart(2, '0')}.mp3?v=2`;
+      narrator.src = `audio/page-${String(actual).padStart(2, '0')}.mp3`;
       narrator.play().catch(() => { hint.textContent = 'Turn the speaker off and on once'; });
     }
 
