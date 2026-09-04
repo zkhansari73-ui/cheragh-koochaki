@@ -136,7 +136,7 @@
     narrator.preload = 'auto';
     const pageTurn = new Audio('audio/page-turn.wav');
     pageTurn.preload = 'auto';
-    pageTurn.volume = 0.65;
+    pageTurn.volume = 1;
     const page = document.getElementById('page');
     const book = document.getElementById('book');
     const current = document.getElementById('current');
@@ -181,13 +181,12 @@
       const actual = pageNumbers[index - 1];
       if (!soundEnabled || !narration[actual]) return;
       narrator.src = `audio/page-${String(actual).padStart(2, '0')}.mp3`;
-      narrator.play().catch(() => { hint.textContent = 'Turn the speaker off and on once'; });
+      narrator.play().catch(() => { hint.textContent = 'Tap the yellow speaker once to start audio'; });
     }
 
     function playTurnSound() {
-      if (!soundEnabled) return;
       pageTurn.currentTime = 0;
-      pageTurn.play().catch(() => {});
+      pageTurn.play().catch(() => { hint.textContent = 'Tap the yellow speaker once to start audio'; });
     }
 
     async function go(delta) {
@@ -217,7 +216,13 @@
       soundOn.hidden = !soundEnabled;
       soundOff.hidden = soundEnabled;
       hint.textContent = soundEnabled ? 'Story audio is on' : 'Tap the speaker to hear the story';
-      if (soundEnabled) readPage(); else stopAudio();
+      if (soundEnabled) {
+        playTurnSound();
+        readPage();
+      } else {
+        narrator.pause();
+        narrator.currentTime = 0;
+      }
     });
     addEventListener('beforeinstallprompt', event => {
       event.preventDefault();
