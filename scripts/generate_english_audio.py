@@ -26,7 +26,7 @@ NARRATION = {
 
 async def main():
     for page, text in NARRATION.items():
-        voice = edge_tts.Communicate(text, "en-IN-NeerjaNeural", rate="-4%", pitch="+2Hz", volume="+5%")
+        voice = edge_tts.Communicate(text, "en-US-AnaNeural", rate="-3%", pitch="-1Hz", volume="+2%")
         await voice.save(str(OUT / f"page-{page:02d}.mp3"))
 
 asyncio.run(main())
