@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Leo's Super Fuel Adventure</title>
+  <meta name="theme-color" content="#071426" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Super Fuel" />
+  <meta name="description" content="Leo's Super Fuel Adventure — an interactive illustrated story." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="apple-touch-icon" href="icons/icon.svg" />
+  
+  <style>
+  /* <![CDATA[ */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #071426;
+      background: radial-gradient(circle at 50% 15%, #0f2747 0%, #071426 75%);
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow-x: hidden;
+      padding: 12px 16px 20px;
+    }
+
+    .app-header {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 4px 10px;
+    }
+
+    .app-title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.2px;
+    }
+
+    .speaker-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .speaker-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .speaker-btn.speaking {
+      background: #facc15;
+      color: #0f172a;
+      border-color: #facc15;
+      box-shadow: 0 0 14px rgba(250, 204, 21, 0.6);
+      animation: pulse 1.4s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .speaker-btn.muted svg path.sound-wave {
+      display: none;
+    }
+
+    .card-container {
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 1 / 1.08;
+      position: relative;
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      background: #091a32;
+    }
+
+    .page-slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      transform: scale(0.97);
+    }
+
+    .page-slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    .page-artwork {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .story-bubble {
+      position: absolute;
+      top: 18px;
+      left: 16px;
+      max-width: 74%;
+      background: rgba(11, 24, 46, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 18px;
+      padding: 13px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+
+    .story-bubble p {
+      color: #f1f5f9;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      font-weight: 400;
+    }
+
+    .action-container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      justify-content: center;
+      margin: 16px 0 12px;
+    }
+
+    .install-btn {
+      background: #facc15;
+      background: linear-gradient(135deg, #fde047 0%, #eab308 100%);
+      color: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 13px 44px;
+      border-radius: 9999px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(234, 179, 8, 0.38);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .install-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 26px rgba(234, 179, 8, 0.55);
+    }
+
+    .install-btn:active {
+      transform: translateY(0);
+    }
+
+    .nav-bar {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 4px 6px;
+    }
+
+    .nav-arrow-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      width: 52px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.3rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-arrow-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .nav-arrow-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    .nav-status {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .page-count {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .speaker-hint {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 25px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid #facc15;
+      color: #fef08a;
+      padding: 13px 20px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      z-index: 100;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      text-align: center;
+      max-width: 90%;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  /* ]]> */
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="app-title">Leo's Super Fuel Adventure</div>
+    <button class="speaker-btn" id="speakerBtn" title="Toggle audio narration">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <path class="sound-wave" d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+      </svg>
+    </button>
+  </header>
+
+  <main class="card-container" id="bookCard">
+
+    <!-- PAGE 0: Cover Page -->
+    <div class="page-slide active" data-index="0">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="covGlow" cx="50%" cy="45%" r="45%">
+            <stop offset="0%" stop-color="#fde047" stop-opacity="0.8" />
+            <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#071426" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="400" height="430" fill="#071426" />
+        <circle cx="200" cy="190" r="150" fill="url(#covGlow)" />
+        <circle cx="60" cy="60" r="2" fill="#fff" />
+        <circle cx="340" cy="80" r="2.5" fill="#fff" />
+        <circle cx="280" cy="40" r="1.5" fill="#fff" />
+        <circle cx="90" cy="120" r="1.5" fill="#fff" />
+        <ellipse cx="200" cy="380" rx="150" ry="35" fill="#142c4b" />
+        <rect x="165" y="325" width="28" height="15" rx="6" fill="#ef4444" />
+        <rect x="210" y="325" width="28" height="15" rx="6" fill="#ef4444" />
+        <rect x="175" y="270" width="50" height="40" rx="8" fill="#1e3a8a" />
+        <rect x="170" y="210" width="60" height="65" rx="12" fill="#0284c7" />
+        <rect x="170" y="222" width="60" height="8" fill="#ffffff" />
+        <rect x="170" y="238" width="60" height="8" fill="#ffffff" />
+        <rect x="170" y="254" width="60" height="8" fill="#ffffff" />
+        <circle cx="200" cy="165" r="28" fill="#fed7aa" />
+        <path d="M172 165 C 168 135, 232 135, 228 165 C 220 145, 180 145, 172 165 Z" fill="#78350f" />
+        <circle cx="192" cy="165" r="4.5" fill="#1e1b4b" />
+        <circle cx="208" cy="165" r="4.5" fill="#1e1b4b" />
+        <circle cx="191" cy="163" r="1.5" fill="#ffffff" />
+        <circle cx="207" cy="163" r="1.5" fill="#ffffff" />
+        <circle cx="185" cy="172" r="3" fill="#f43f5e" opacity="0.4" />
+        <circle cx="215" cy="172" r="3" fill="#f43f5e" opacity="0.4" />
+        <path d="M194 175 Q 200 182 206 175" stroke="#991b1b" stroke-width="2" fill="none" />
+        <path d="M172 215 Q 140 250 130 290 Q 160 270 172 230 Z" fill="#dc2626" />
+        <path d="M235 200 L255 180 L250 215 Z" fill="#f59e0b" />
+      </svg>
+      <div class="story-bubble">
+        <p><strong>Leo's Super Fuel Adventure</strong><br />A fun story about a playful boy who discovered the secret power of food!</p>
+      </div>
+    </div>
+
+    <!-- PAGE 1: Meet Leo -->
+    <div class="page-slide" data-index="1">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="430" fill="#0d1b2a" />
+        <ellipse cx="200" cy="380" rx="160" ry="30" fill="#1e293b" />
+        <path d="M40 370 Q 200 340 360 370" stroke="#f59e0b" stroke-dasharray="6 8" stroke-width="3" fill="none" />
+        <rect x="70" y="355" width="30" height="15" rx="4" fill="#3b82f6" />
+        <rect x="300" y="355" width="25" height="14" rx="4" fill="#ef4444" />
+        <circle cx="200" cy="200" r="26" fill="#fed7aa" />
+        <path d="M174 200 C 170 170, 230 170, 226 200 C 218 180, 182 180, 174 200 Z" fill="#78350f" />
+        <circle cx="193" cy="200" r="4" fill="#1e1b4b" />
+        <circle cx="207" cy="200" r="4" fill="#1e1b4b" />
+        <path d="M195 210 Q 200 216 205 210" stroke="#991b1b" stroke-width="2" fill="none" />
+        <rect x="175" y="240" width="50" height="55" rx="10" fill="#0284c7" />
+        <rect x="175" y="250" width="50" height="7" fill="#ffffff" />
+        <rect x="175" y="265" width="50" height="7" fill="#ffffff" />
+        <rect x="180" y="295" width="40" height="35" rx="6" fill="#1e3a8a" />
+        <rect x="170" y="340" width="25" height="14" rx="5" fill="#ef4444" />
+        <rect x="210" y="340" width="25" height="14" rx="5" fill="#ef4444" />
+      </svg>
+      <div class="story-bubble">
+        <p>Five-year-old Leo was faster than a race car. "Vroom! Zoom!" he shouted, zooming his red sneakers across the living room rug.</p>
+      </div>
+    </div>
+
+    <!-- PAGE 2: Breakfast Time -->
+    <div class="page-slide" data-index="2">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="430" fill="#081423" />
+        <rect x="60" y="260" width="280" height="130" rx="12" fill="#573822" />
+        <ellipse cx="200" cy="265" rx="120" ry="20" fill="#78350f" />
+        <ellipse cx="140" cy="255" rx="35" ry="16" fill="#fef08a" stroke="#ca8a04" stroke-width="2" />
+        <circle cx="130" cy="252" r="5" fill="#ef4444" />
+        <circle cx="145" cy="250" r="4.5" fill="#ef4444" />
+        <circle cx="290" cy="180" r="24" fill="#fed7aa" />
+        <path d="M266 180 C 266 150, 314 150, 314 180 Z" fill="#92400e" />
+        <rect x="270" y="215" width="40" height="60" rx="8" fill="#f43f5e" />
+        <path d="M265 230 L315 230 L310 275 L270 275 Z" fill="#ffffff" />
+        <circle cx="70" cy="200" r="22" fill="#fed7aa" />
+        <path d="M48 200 C 48 175, 92 175, 92 200 Z" fill="#78350f" />
+        <rect x="52" y="235" width="36" height="40" rx="8" fill="#0284c7" />
+      </svg>
+      <div class="story-bubble">
+        <p>"Breakfast time, Leo!" Mom called with warm oatmeal and berries. Leo giggled, "No way, Mom! Space rockets don't need breakfast; they run on pure speed!"</p>
+      </div>
+    </div>
+
+    <!-- PAGE 3: Lunchtime Excuses -->
+    <div class="page-slide" data-index="3">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="430" fill="#09182d" />
+        <rect x="80" y="230" width="240" height="120" rx="18" fill="#1e3a8a" stroke="#172554" stroke-width="3" />
+        <circle cx="180" cy="210" r="22" fill="#fed7aa" />
+        <path d="M158 210 C 158 185, 202 185, 202 210 Z" fill="#78350f" />
+        <circle cx="173" cy="210" r="3.5" fill="#1e1b4b" />
+        <circle cx="187" cy="210" r="3.5" fill="#1e1b4b" />
+        <ellipse cx="320" cy="300" rx="40" ry="18" fill="#ffffff" />
+        <line x1="305" y1="298" x2="335" y2="295" stroke="#f97316" stroke-width="5" stroke-linecap="round" />
+        <line x1="310" y1="304" x2="330" y2="303" stroke="#f97316" stroke-width="4" stroke-linecap="round" />
+      </svg>
+      <div class="story-bubble">
+        <p>At lunchtime, Mom served crunchy carrots and toast. Leo ducked behind the couch. "I'm full already! My belly is stuffed with happy giggles!"</p>
+      </div>
+    </div>
+
+    <!-- PAGE 4: Off to the Park -->
+    <div class="page-slide" data-index="4">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="parkSky4" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0b1c34" />
+            <stop offset="100%" stop-color="#143c64" />
+          </linearGradient>
+        </defs>
+        <rect width="400" height="430" fill="url(#parkSky4)" />
+        <circle cx="330" cy="90" r="30" fill="#fde047" opacity="0.8" />
+        <path d="M0 310 Q 180 270 400 310 L400 430 L0 430 Z" fill="#15803d" />
+        <path d="M70 330 L110 240 L120 240 L80 330 Z" fill="#eab308" />
+        <circle cx="280" cy="290" r="16" fill="#fed7aa" />
+        <rect x="272" y="310" width="16" height="30" rx="4" fill="#a855f7" />
+        <circle cx="330" cy="295" r="15" fill="#fbcfe8" />
+        <rect x="323" y="313" width="14" height="28" rx="4" fill="#059669" />
+      </svg>
+      <div class="story-bubble">
+        <p>That afternoon, Leo ran to the sunny park. His best pals, Mia and Toby, were already warming up for their big game: Dinosaur Tag!</p>
+      </div>
+    </div>
+
+    <!-- PAGE 5: Dinosaur Tag -->
+    <div class="page-slide" data-index="5">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="430" fill="#08182b" />
+        <path d="M0 300 Q 200 260 400 300 L400 430 L0 430 Z" fill="#166534" />
+        <circle cx="310" cy="260" r="16" fill="#fed7aa" />
+        <rect x="303" y="280" width="14" height="30" rx="4" fill="#0284c7" />
+        <circle cx="140" cy="250" r="22" fill="#fed7aa" />
+        <path d="M118 250 C 118 225, 162 225, 162 250 Z" fill="#78350f" />
+        <rect x="122" y="285" width="36" height="40" rx="8" fill="#0284c7" />
+        <rect x="122" y="295" width="36" height="6" fill="#ffffff" />
+        <rect x="115" y="340" width="22" height="12" rx="4" fill="#ef4444" />
+        <rect x="145" y="340" width="22" height="12" rx="4" fill="#ef4444" />
+      </svg>
+      <div class="story-bubble">
+        <p>"You're it, Leo!" yelled Toby, sprinting across the grass. Leo laughed and revved up his sneakers. "I am Turbo T-Rex! You can't outrun me!"</p>
+      </div>
+    </div>
+
+    <!-- PAGE 6: Running Out of Power -->
+    <div class="page-slide" data-index="6">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="430" fill="#071322" />
+        <path d="M0 320 Q 200 290 400 320 L400 430 L0 430 Z" fill="#14532d" />
+        <circle cx="340" cy="280" r="11" fill="#fed7aa" />
+        <circle cx="370" cy="275" r="10" fill="#fbcfe8" />
+        <circle cx="160" cy="270" r="22" fill="#fed7aa" />
+        <path d="M138 270 C 138 245, 182 245, 182 270 Z" fill="#78350f" />
+        <path d="M152 300 L168 335" stroke="#0284c7" stroke-width="18" stroke-linecap="round" />
+        <rect x="185" y="210" width="34" height="20" rx="4" fill="none" stroke="#ef4444" stroke-width="2" />
+        <rect x="219" y="215" width="4" height="10" fill="#ef4444" />
+        <rect x="188" y="213" width="7" height="14" fill="#ef4444" />
+      </svg>
+      <div class="story-bubble">
+        <p>Suddenly, Leo's turbo legs felt as heavy as stone. His zoom turned into a slow turtle walk. He could barely lift his favorite sneakers!</p>
+      </div>
+    </div>
+
+    <!-- PAGE 7: The Grumbling Belly -->
+    <div class="page-slide" data-index="7">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="430" fill="#061220" />
+        <path d="M0 340 L400 340 L400 430 L0 430 Z" fill="#0f3d24" />
+        <ellipse cx="200" cy="370" rx="50" ry="18" fill="#022c22" />
+        <circle cx="190" cy="300" r="24" fill="#fed7aa" />
+        <path d="M166 300 C 166 270, 214 270, 214 300 Z" fill="#78350f" />
+        <circle cx="183" cy="300" r="3.5" fill="#1e1b4b" />
+        <circle cx="197" cy="300" r="3.5" fill="#1e1b4b" />
+        <path d="M185 315 Q 190 310 195 315" stroke="#991b1b" stroke-width="2" fill="none" />
+        <path d="M220 325 Q 235 320 240 330" stroke="#f59e0b" stroke-width="2.5" fill="none" />
+        <path d="M225 315 Q 245 310 250 325" stroke="#f59e0b" stroke-width="2" fill="none" />
+      </svg>
+      <div class="story-bubble">
+        <p>Leo plopped down on the grass. His friends zoomed far ahead. Right then, his tummy let out a loud, grumpy complaint: <em>Grumble-squeak-rumble!</em></p>
+      </div>
+    </div>
+
+    <!-- PAGE 8: Mom's Pit Stop -->
+    <div class="page-slide" data-index="8">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="430" fill="#081524" />
+        <path d="M0 350 L400 350 L400 430 L0 430 Z" fill="#14532d" />
+        <circle cx="140" cy="270" r="22" fill="#fed7aa" />
+        <path d="M118 270 C 118 245, 162 245, 162 270 Z" fill="#92400e" />
+        <rect x="122" y="300" width="36" height="50" rx="8" fill="#f43f5e" />
+        <rect x="165" y="320" width="40" height="25" rx="5" fill="#0ea5e9" />
+        <circle cx="260" cy="310" r="20" fill="#fed7aa" />
+        <path d="M240 310 C 240 285, 280 285, 280 310 Z" fill="#78350f" />
+        <rect x="245" y="335" width="30" height="30" rx="6" fill="#0284c7" />
+      </svg>
+      <div class="story-bubble">
+        <p>Mom came over with a gentle smile and knelt beside him. "What happened, Captain Turbo?" Leo frowned. "Mom, my rocket motor stopped working."</p>
+      </div>
+    </div>
+
+    <!-- PAGE 9: The Secret Super Fuel -->
+    <div class="page-slide" data-index="9">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="boxGlow9" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fef08a" stop-opacity="0.9" />
+            <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.3" />
+            <stop offset="100%" stop-color="#081524" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="400" height="430" fill="#081524" />
+        <circle cx="200" cy="260" r="120" fill="url(#boxGlow9)" />
+        <rect x="130" y="240" width="140" height="85" rx="10" fill="#0284c7" stroke="#38bdf8" stroke-width="3" />
+        <path d="M150 260 Q 165 240 180 260 Z" fill="#ef4444" />
+        <rect x="190" y="255" width="22" height="18" rx="3" fill="#facc15" />
+        <circle cx="235" cy="265" r="9" fill="#22c55e" />
+        <circle cx="248" cy="262" r="8" fill="#22c55e" />
+      </svg>
+      <div class="story-bubble">
+        <p>"Your motor isn't broken, Leo," Mom chuckled softly. "Even the fastest race car needs a pit stop. Food is your body's super fuel!"</p>
+      </div>
+    </div>
+
+    <!-- PAGE 10: Food Superpowers -->
+    <div class="page-slide" data-index="10">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="430" fill="#071322" />
+        <circle cx="100" cy="260" r="38" fill="#1e3a8a" stroke="#3b82f6" stroke-width="3" />
+        <rect x="88" y="250" width="24" height="20" rx="4" fill="#facc15" />
+        <text x="100" y="320" fill="#93c5fd" font-size="12" font-weight="700" text-anchor="middle">MUSCLES</text>
+        <circle cx="200" cy="250" r="44" fill="#064e3b" stroke="#10b981" stroke-width="3" />
+        <circle cx="200" cy="245" r="18" fill="#ef4444" />
+        <text x="200" y="320" fill="#a7f3d0" font-size="12" font-weight="700" text-anchor="middle">SHIELD</text>
+        <circle cx="300" cy="260" r="38" fill="#78350f" stroke="#f59e0b" stroke-width="3" />
+        <path d="M295 242 L310 255 L290 272 Z" fill="#fde047" />
+        <text x="300" y="320" fill="#fde68a" font-size="12" font-weight="700" text-anchor="middle">SPEED</text>
+      </svg>
+      <div class="story-bubble">
+        <p>"Cheese and eggs build strong jumping muscles. Crunchy fruits build your health shield, and bread gives your legs running power!"</p>
+      </div>
+    </div>
+
+    <!-- PAGE 11: The First Brave Bite -->
+    <div class="page-slide" data-index="11">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="430" fill="#09182d" />
+        <circle cx="200" cy="230" r="90" fill="#fef08a" opacity="0.25" />
+        <circle cx="200" cy="210" r="30" fill="#fed7aa" />
+        <path d="M170 210 C 170 175, 230 175, 230 210 Z" fill="#78350f" />
+        <circle cx="190" cy="208" r="4.5" fill="#1e1b4b" />
+        <circle cx="210" cy="208" r="4.5" fill="#1e1b4b" />
+        <circle cx="189" cy="205" r="1.5" fill="#ffffff" />
+        <circle cx="209" cy="205" r="1.5" fill="#ffffff" />
+        <path d="M195 225 Q 210 212 225 225 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="1.5" />
+        <polygon points="230,195 235,185 240,195 250,198 240,203 235,213 230,203 220,198" fill="#fde047" />
+      </svg>
+      <div class="story-bubble">
+        <p>Leo looked at a shiny red apple slice. He took one brave little bite. <em>CRUNCH!</em> Sweet juice splashed on his tongue. Next, he tried a savory cube of cheese.</p>
+      </div>
+    </div>
+
+    <!-- PAGE 12: Turbo Power Restored -->
+    <div class="page-slide" data-index="12">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="430" fill="#0a1f3a" />
+        <path d="M0 320 Q 200 280 400 320 L400 430 L0 430 Z" fill="#15803d" />
+        <circle cx="200" cy="180" r="25" fill="#fed7aa" />
+        <path d="M175 180 C 175 150, 225 150, 225 180 Z" fill="#78350f" />
+        <circle cx="192" cy="180" r="4" fill="#1e1b4b" />
+        <circle cx="208" cy="180" r="4" fill="#1e1b4b" />
+        <path d="M192 195 Q 200 205 208 195" stroke="#991b1b" stroke-width="2.5" fill="none" />
+        <rect x="175" y="215" width="50" height="55" rx="10" fill="#0284c7" />
+        <rect x="175" y="225" width="50" height="7" fill="#ffffff" />
+        <rect x="175" y="240" width="50" height="7" fill="#ffffff" />
+        <rect x="165" y="270" width="22" height="35" rx="6" fill="#1e3a8a" transform="rotate(-15 175 270)" />
+        <rect x="215" y="270" width="22" height="35" rx="6" fill="#1e3a8a" transform="rotate(15 215 270)" />
+        <rect x="150" y="305" width="25" height="14" rx="5" fill="#ef4444" />
+        <rect x="225" y="305" width="25" height="14" rx="5" fill="#ef4444" />
+      </svg>
+      <div class="story-bubble">
+        <p>A few minutes later, warm energy sparkled in Leo's knees. He bounced high on his toes and cheered, "My fuel tank is refilled! Turbo Rex is back!"</p>
+      </div>
+    </div>
+
+    <!-- PAGE 13: Realistic Dinner Ending -->
+    <div class="page-slide" data-index="13">
+      <svg class="page-artwork" viewBox="0 0 400 430" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="dinGlow" cx="50%" cy="40%" r="50%">
+            <stop offset="0%" stop-color="#fef08a" stop-opacity="0.8" />
+            <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.3" />
+            <stop offset="100%" stop-color="#081423" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="400" height="430" fill="#081423" />
+        <circle cx="200" cy="220" r="140" fill="url(#dinGlow)" />
+        <rect x="60" y="270" width="280" height="120" rx="14" fill="#573822" />
+        <ellipse cx="200" cy="275" rx="120" ry="20" fill="#78350f" />
+        <ellipse cx="200" cy="270" rx="45" ry="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" />
+        <circle cx="185" cy="265" r="7" fill="#15803d" />
+        <circle cx="200" cy="263" r="8" fill="#16a34a" />
+        <circle cx="215" cy="266" r="7" fill="#15803d" />
+        <circle cx="200" cy="170" r="26" fill="#fed7aa" />
+        <path d="M174 170 C 170 140, 226 140, 226 170 Z" fill="#78350f" />
+        <circle cx="193" cy="170" r="4" fill="#1e1b4b" />
+        <circle cx="207" cy="170" r="4" fill="#1e1b4b" />
+        <path d="M194 182 Q 200 190 206 182" stroke="#991b1b" stroke-width="2" fill="none" />
+        <rect x="175" y="205" width="50" height="60" rx="10" fill="#0284c7" />
+      </svg>
+      <div class="story-bubble">
+        <p>At dinner, Leo didn't eat everything. But he proudly ate three little broccoli trees and two bites of chicken. "Every rocket needs its super fuel!" he smiled. The End.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="action-container">
+    <button class="install-btn" id="installBtn">
+      <span>Install offline</span>
+    </button>
+  </div>
+
+  <footer class="nav-bar">
+    <button class="nav-arrow-btn" id="prevBtn" disabled="disabled">‹</button>
+    <div class="nav-status">
+      <div class="page-count" id="pageIndicator">Cover</div>
+      <div class="speaker-hint">Tap the speaker to hear the story</div>
+    </div>
+    <button class="nav-arrow-btn" id="nextBtn">›</button>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+  // <![CDATA[
+    const totalPages = 13;
+    let currentPage = 0;
+    let isMuted = false;
+    let deferredPrompt = null;
+    let currentUtterance = null;
+
+    const slides = document.querySelectorAll('.page-slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageIndicator = document.getElementById('pageIndicator');
+    const speakerBtn = document.getElementById('speakerBtn');
+    const installBtn = document.getElementById('installBtn');
+    const toast = document.getElementById('toast');
+
+    const storyAudioTexts = {
+      0: "Leo's Super Fuel Adventure. A fun story about a playful boy who discovered the secret power of food!",
+      1: "Chapter 1. Five-year-old Leo was faster than a race car. Vroom! Zoom! he shouted, zooming his red sneakers across the living room rug.",
+      2: "Chapter 2. Breakfast time, Leo! Mom called with warm oatmeal and berries. Leo giggled, No way, Mom! Space rockets don't need breakfast; they run on pure speed!",
+      3: "Chapter 3. At lunchtime, Mom served crunchy carrots and toast. Leo ducked behind the couch. I'm full already! My belly is stuffed with happy giggles!",
+      4: "Chapter 4. That afternoon, Leo ran to the sunny park. His best pals, Mia and Toby, were already warming up for their big game: Dinosaur Tag!",
+      5: "Chapter 5. You're it, Leo! yelled Toby, sprinting across the grass. Leo laughed and revved up his sneakers. I am Turbo T-Rex! You can't outrun me!",
+      6: "Chapter 6. Suddenly, Leo's turbo legs felt as heavy as stone. His zoom turned into a slow turtle walk. He could barely lift his favorite sneakers!",
+      7: "Chapter 7. Leo plopped down on the grass. His friends zoomed far ahead. Right then, his tummy let out a loud, grumpy complaint: Grumble, squeak, rumble!",
+      8: "Chapter 8. Mom came over with a gentle smile and knelt beside him. What happened, Captain Turbo? Leo frowned. Mom, my rocket motor stopped working.",
+      9: "Chapter 9. Your motor isn't broken, Leo, Mom chuckled softly. Even the fastest race car needs a pit stop. Food is your body's super fuel!",
+      10: "Chapter 10. Cheese and eggs build strong jumping muscles. Crunchy fruits build your health shield, and bread gives your legs running power!",
+      11: "Chapter 11. Leo looked at a shiny red apple slice. He took one brave little bite. Crunch! Sweet juice splashed on his tongue. Next, he tried a savory cube of cheese.",
+      12: "Chapter 12. A few minutes later, warm energy sparkled in Leo's knees. He bounced high on his toes and cheered, My fuel tank is refilled! Turbo Rex is back!",
+      13: "Chapter 13. At dinner, Leo didn't eat everything. But he proudly ate three little broccoli trees and two bites of chicken. Every rocket needs its super fuel! he smiled. The End."
+    };
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 3500);
+    }
+
+    function playTurnSound() {
+      try {
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        var ctx = new AudioCtx();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+      } catch (e) {}
+    }
+
+    function playChimeSound() {
+      try {
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!window.audioCtx) {
+          window.audioCtx = new AudioCtx();
+        }
+        if (window.audioCtx.state === 'suspended') {
+          window.audioCtx.resume();
+        }
+        var now = window.audioCtx.currentTime;
+        var osc = window.audioCtx.createOscillator();
+        var gain = window.audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.12); // E5
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(window.audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } catch(e){}
+    }
+
+    function readPage(pageIndex) {
+      if (isMuted) return;
+      playChimeSound();
+
+      if (!('speechSynthesis' in window)) {
+        showToast("Device text-to-speech not supported");
+        return;
+      }
+
+      var text = storyAudioTexts[pageIndex];
+      if (!text) return;
+
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
+
+      setTimeout(function() {
+        try {
+          window.currentUtterance = new SpeechSynthesisUtterance(text);
+          window.currentUtterance.lang = 'en-US';
+          window.currentUtterance.rate = 0.92;
+          window.currentUtterance.pitch = 1.05;
+
+          var voices = window.speechSynthesis.getVoices();
+          if (voices && voices.length > 0) {
+            for (var i = 0; i < voices.length; i++) {
+              if (voices[i].lang && voices[i].lang.toLowerCase().indexOf('en') === 0) {
+                window.currentUtterance.voice = voices[i];
+                break;
+              }
+            }
+          }
+
+          window.currentUtterance.onstart = function() {
+            speakerBtn.classList.add('speaking');
+          };
+
+          window.currentUtterance.onend = function() {
+            speakerBtn.classList.remove('speaking');
+          };
+
+          window.currentUtterance.onerror = function(err) {
+            speakerBtn.classList.remove('speaking');
+            console.log("TTS error:", err);
+          };
+
+          window.speechSynthesis.speak(window.currentUtterance);
+        } catch(err) {
+          console.log("Speak error:", err);
+        }
+      }, 120);
+    }
+function goToPage(idx) {
+      if (idx < 0 || idx > totalPages) return;
+      playTurnSound();
+      slides.forEach(function(s) {
+        var p = parseInt(s.getAttribute('data-index'), 10);
+        if (p === idx) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+      currentPage = idx;
+      try { localStorage.setItem('leo-super-fuel-en-page', String(currentPage)); } catch (e) {}
+      if (currentPage === 0) {
+        pageIndicator.textContent = "Cover";
+      } else {
+        pageIndicator.textContent = currentPage + " of " + totalPages;
+      }
+      
+      if (currentPage === 0) {
+        prevBtn.setAttribute('disabled', 'disabled');
+      } else {
+        prevBtn.removeAttribute('disabled');
+      }
+
+      if (currentPage === totalPages) {
+        nextBtn.setAttribute('disabled', 'disabled');
+      } else {
+        nextBtn.removeAttribute('disabled');
+      }
+      readPage(currentPage);
+    }
+
+    prevBtn.addEventListener('click', function() { goToPage(currentPage - 1); });
+    nextBtn.addEventListener('click', function() { goToPage(currentPage + 1); });
+
+    speakerBtn.addEventListener('click', function() {
+      isMuted = !isMuted;
+      speakerBtn.classList.toggle('muted', isMuted);
+      if (isMuted) {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        speakerBtn.classList.remove('speaking');
+        showToast("Narration paused");
+      } else {
+        showToast("Narration enabled");
+        readPage(currentPage);
+      }
+    });
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.classList.add('install-ready');
+    });
+
+    window.addEventListener('appinstalled', function() {
+      deferredPrompt = null;
+      installBtn.querySelector('span').textContent = 'Installed';
+      showToast('App installed to Home Screen!');
+    });
+
+    installBtn.addEventListener('click', function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(res) {
+          if (res.outcome === 'accepted') {
+            showToast("App installed to Home Screen!");
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+          showToast('The book is already installed');
+        } else {
+          showToast("In Chrome menu (⋮) tap 'Install app' or 'Add to Home screen'");
+        }
+      }
+    });
+
+    var touchX = 0;
+    var card = document.getElementById('bookCard');
+    card.addEventListener('touchstart', function(e) { touchX = e.touches[0].clientX; }, {passive: true});
+    card.addEventListener('touchend', function(e) {
+      var diff = e.changedTouches[0].clientX - touchX;
+      if (diff < -40 && currentPage < totalPages) goToPage(currentPage + 1);
+      if (diff > 40 && currentPage > 0) goToPage(currentPage - 1);
+    }, {passive: true});
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight' && currentPage < totalPages) goToPage(currentPage + 1);
+      if (e.key === 'ArrowLeft' && currentPage > 0) goToPage(currentPage - 1);
+    });
+
+    
+    // User touch unlock for audio
+    document.body.addEventListener('click', function() {
+      if (window.audioCtx && window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume();
+      }
+      if ('speechSynthesis' in window && window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+    }, { once: true });
+if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = function() {
+        // Voices ready
+      };
+    }
+
+    try {
+      var savedPage = parseInt(localStorage.getItem('leo-super-fuel-en-page') || '0', 10);
+      if (!isNaN(savedPage) && savedPage >= 0 && savedPage <= totalPages) goToPage(savedPage);
+    } catch (e) {}
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./service-worker.js').catch(function() {
+          showToast('Offline setup needs a secure HTTPS link');
+        });
+      });
+    }
+
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      installBtn.querySelector('span').textContent = 'Installed';
+    }
+  // ]]>
+  </script>
+</body>
+</html>
