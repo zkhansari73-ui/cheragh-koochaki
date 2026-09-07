@@ -1,0 +1,22 @@
+{
+  "name": "Leo's Super Fuel Adventure",
+  "short_name": "Super Fuel",
+  "description": "An interactive illustrated story about food as fuel for play and growth.",
+  "id": "/cheragh-koochaki/leo-super-fuel/",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#071426",
+  "theme_color": "#071426",
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
