@@ -3,9 +3,9 @@ const pages=[["خرس کوچولو","در دل یک جنگل بزرگ و سبز�
 let i=Math.max(0,Math.min(23,+localStorage.getItem('bear-page')||0)),audioOn=false,startX=0,deferred;
 const el=id=>document.getElementById(id), page=el('page');
 function draw(){el('title').textContent=pages[i][0];el('story').textContent=pages[i][1];el('cur').textContent=i+1;localStorage.setItem('bear-page',i);if(audioOn)read()}
-function read(){speechSynthesis.cancel();if(!audioOn)return;let u=new SpeechSynthesisUtterance(pages[i][0]+'. '+pages[i][1]);u.lang='fa-IR';u.rate=.85;speechSynthesis.speak(u)}
+function read(){speechSynthesis.cancel();if(!audioOn)return;const text=pages[i][0]+'. '+pages[i][1];const u=new SpeechSynthesisUtterance(text);const voices=speechSynthesis.getVoices();const fa=voices.find(v=>/^fa(-|_)/i.test(v.lang))||voices.find(v=>/persian|farsi/i.test(v.name));u.lang=fa?fa.lang:'fa-IR';if(fa)u.voice=fa;u.rate=.82;u.pitch=1.05;u.volume=1;u.onerror=()=>{el('hint').textContent='صدای فارسی گوشی فعال نیست؛ Text-to-Speech فارسی را در تنظیمات گوشی فعال کن'};speechSynthesis.resume();speechSynthesis.speak(u)}
 function go(d){let n=i+d;if(n<0||n>23)return;speechSynthesis.cancel();i=n;page.classList.remove('turn');void page.offsetWidth;page.classList.add('turn');draw()}
-el('next').onclick=()=>go(1);el('prev').onclick=()=>go(-1);el('sound').onclick=()=>{audioOn=!audioOn;el('sound').textContent=audioOn?'🔊':'🔇';el('hint').textContent=audioOn?'خواندن داستان روشن است':'برای شنیدن داستان 🔊 را بزن';audioOn?read():speechSynthesis.cancel()};
+el('next').onclick=()=>go(1);el('prev').onclick=()=>go(-1);speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();el('sound').onclick=()=>{audioOn=!audioOn;el('sound').textContent=audioOn?'🔊':'🔇';el('hint').textContent=audioOn?'خواندن داستان روشن است':'برای شنیدن داستان 🔊 را بزن';audioOn?read():speechSynthesis.cancel()};
 page.onpointerdown=e=>startX=e.clientX;page.onpointerup=e=>{let d=e.clientX-startX;if(Math.abs(d)>45)go(d<0?1:-1)};
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e});el('install').onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null}else alert('در Chrome از منوی سه‌نقطه، Install app یا Add to Home screen را بزن.')};
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));draw();
